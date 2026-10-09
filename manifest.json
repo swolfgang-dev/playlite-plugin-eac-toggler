@@ -1,11 +1,11 @@
 {
   "id": "EacToggler",
   "name": "EasyAntiCheat Toggler",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "api_version": 1,
   "type": "generic",
   "enabled": true,
   "repository": "swolfgang-dev/playlite-plugin-eac-toggler",
-  "minimum_playlite_version": "0.2.44",
+  "minimum_playlite_version": "0.2.74",
   "description": "Enable or disable Elden Ring EasyAntiCheat for offline play, with original-file backups."
 }

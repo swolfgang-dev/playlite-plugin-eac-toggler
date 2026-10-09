@@ -24,7 +24,9 @@ class Plugin(GenericPlugin):
             message='Restore the original launcher?' if restore else 'Disable EasyAntiCheat for Elden Ring? This forces offline play. The original launcher will be backed up.'
             if QMessageBox.question(window,title,message)!=QMessageBox.StandardButton.Yes:return
             (enable if restore else disable)(game['InstallDirectory'])
-            QMessageBox.information(window,title,'EasyAntiCheat enabled.' if restore else 'EasyAntiCheat disabled for offline play.')
+            message='EasyAntiCheat enabled.' if restore else 'EasyAntiCheat disabled for offline play.'
+            if hasattr(window,'statusBar'):window.statusBar().showMessage(message,8000)
+            else:QMessageBox.information(window,title,message)
         except (ValueError,OSError,KeyError) as error:QMessageBox.warning(window,'EasyAntiCheat Toggler',str(error))
 
     def before_launch(self,window,game):
