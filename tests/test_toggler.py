@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 import sys
+import json
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import toggler
 
@@ -23,6 +24,15 @@ class TogglerTests(unittest.TestCase):
         self.assertEqual((self.root/'start_protected_game.exe').read_bytes(),b'MZeac')
         self.assertFalse((self.root/'steam_appid.txt').exists())
         self.assertFalse((self.root/toggler.STATE).exists())
+
+    def test_malformed_backup_records_fail_before_modifying_launchers(self):
+        toggler.disable(self.root)
+        launcher = (self.root / 'start_protected_game.exe').read_bytes()
+        for record in ([], None, {}, {'original': 1, 'patched': [], 'created_appid': 'yes'}):
+            (self.root / toggler.STATE / 'state.json').write_text(json.dumps(record))
+            with self.subTest(record=record), self.assertRaises(ValueError):
+                toggler.enable(self.root)
+            self.assertEqual((self.root / 'start_protected_game.exe').read_bytes(), launcher)
 
     def test_preserves_existing_appid(self):
         (self.root/'steam_appid.txt').write_bytes(b'1245620')

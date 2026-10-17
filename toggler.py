@@ -11,8 +11,11 @@ APPID=b'1245620\n'
 
 
 def digest(path):
+    result = hashlib.sha256()
     with path.open('rb') as stream:
-        return hashlib.file_digest(stream,'sha256').hexdigest()
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            result.update(chunk)
+    return result.hexdigest()
 
 
 def folder(directory):
@@ -46,6 +49,11 @@ def state(root):
     if marker.is_symlink():raise ValueError('Refusing a symlinked backup record.')
     if not marker.is_file():raise ValueError('The backup is incomplete. Restore game files through Steam before retrying.')
     record=json.loads(marker.read_text())
+    if (not isinstance(record, dict) or type(record.get('created_appid')) is not bool
+            or any(not isinstance(record.get(key), str) or len(record[key]) != 64
+                   or any(character not in '0123456789abcdef' for character in record[key])
+                   for key in ('original', 'patched'))):
+        raise ValueError('The backup record is invalid. No game files were changed.')
     original=root/STATE/'start_protected_game.exe'
     if original.is_symlink() or not original.is_file() or digest(original)!=record['original']:
         raise ValueError('The original launcher backup is missing or changed.')
